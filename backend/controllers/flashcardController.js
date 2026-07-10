@@ -52,22 +52,27 @@ export const reviewFlashcard = async (req, res, next) => {
       });
     }
 
-    const cardIndex = flashcardSet.cards.findIndex(card => card._id.toString() === req.params.cardId);
+    const cardIndex = flashcardSet.cards.findIndex(
+      (card) => card._id.toString() === req.params.cardId
+    );
 
-    if(cardIndex===-1){
+    if (cardIndex === -1) {
       return res.status(404).json({
         success: false,
-        error: 'Card not found in set',
-        statusCode: 404
+        error: "Card not found in set",
+        statusCode: 404,
       });
     }
 
-    flashcardSet.cards[cardIndex].lastReviewed=new Date();
-    flashcardSet.cards[cardIndex].reviewCount+=1;
+    flashcardSet.cards[cardIndex].lastReviewed = new Date();
+
+    flashcardSet.cards[cardIndex].reviewCount =
+      (flashcardSet.cards[cardIndex].reviewCount || 0) + 1;
 
     flashcardSet.markModified("cards");
 
     await flashcardSet.save();
+
     return res.status(200).json({
       success: true,
       data: flashcardSet,
@@ -94,7 +99,7 @@ export const toggleStarFlashcard = async (req, res, next) => {
     }
 
     const cardIndex = flashcardSet.cards.findIndex(
-      card => card._id.toString() === req.params.cardId
+      (card) => card._id.toString() === req.params.cardId
     );
 
     if (cardIndex === -1) {
@@ -109,6 +114,7 @@ export const toggleStarFlashcard = async (req, res, next) => {
       !flashcardSet.cards[cardIndex].isStarred;
 
     flashcardSet.markModified("cards");
+
     await flashcardSet.save();
 
     return res.status(200).json({
@@ -125,7 +131,7 @@ export const deleteFlashcardSet = async (req, res, next) => {
   try {
     const flashcardSet = await Flashcard.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user._id,
+      userId: req.user.id,
     });
 
     if (!flashcardSet) {
@@ -136,7 +142,6 @@ export const deleteFlashcardSet = async (req, res, next) => {
       });
     }
 
-    await flashcardSet.deleteOne();
     return res.status(200).json({
       success: true,
       message: "Flashcard set deleted successfully",
